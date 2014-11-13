@@ -13,8 +13,7 @@ namespace entity {
     typedef std::bitset<MAX_COMPONENTS> ComponentFlags;
 
     // Base class used to automatically increment the component type id.
-    class BaseComponent
-    {
+    class BaseComponent {
     public:
         typedef std::uint32_t TypeId;
 
@@ -24,11 +23,9 @@ namespace entity {
 
     // Derive your components from this one!
     template <typename Derived>
-    class Component : public BaseComponent
-    {
+    class Component : public BaseComponent {
     public:
-        static TypeId get_type_id()
-        {
+        static TypeId get_type_id() {
             static TypeId type_id = next_type_id++;
             assert(type_id < MAX_COMPONENTS);
             return type_id;
