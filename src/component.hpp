@@ -22,7 +22,7 @@ namespace entity {
     };
 
     // Derive your components from this one!
-    template <typename Derived>
+    template <typename T>
     class Component : public BaseComponent {
     public:
         static TypeId get_type_id() {

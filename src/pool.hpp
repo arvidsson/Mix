@@ -14,7 +14,7 @@ namespace entity {
     };
 
     // A pool is just a vector (contiguous data).
-    template <typename ElementType>
+    template <typename T>
     class Pool : public BasePool {
     public:
         Pool(int initial_capacity = 100) { reserve(initial_capacity); }
@@ -24,24 +24,24 @@ namespace entity {
         int get_size() const { return data.size(); }
         bool is_empty() const { return data.empty(); }
 
-        bool set(int index, ElementType object) {
+        bool set(int index, T object) {
             assert(index < get_capacity());
             data[index] = object;
             return true;
         }
 
-        ElementType& get(int index) {
+        T& get(int index) {
             assert(index < get_capacity());
-            return (ElementType &)data[index];
+            return (T &)data[index];
         }
 
-        void add(ElementType object) { data.push_back(object); }
+        void add(T object) { data.push_back(object); }
         void reserve(int n) { data.reserve(n); }
         void clear() { data.clear(); }
-        std::vector<ElementType> get_data() const { return data; }
+        std::vector<T> get_data() const { return data; }
 
     private:
-        std::vector<ElementType> data;
+        std::vector<T> data;
     };
 
 }
