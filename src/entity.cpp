@@ -32,6 +32,4 @@ namespace entity {
         reusable_ids.push_back(id);
     }
 
-    
-
 }
