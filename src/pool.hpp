@@ -1,5 +1,5 @@
-#ifndef INCLUDED_POOL_HPP
-#define INCLUDED_POOL_HPP
+#ifndef ENTITY_POOL_INCLUDED
+#define ENTITY_POOL_INCLUDED
 
 #include <vector>
 
@@ -10,7 +10,6 @@ namespace entity {
     {
     public:
         virtual ~BasePool() {};
-        virtual void clear() = 0;
     };
 
     // A pool is just a vector (contiguous data).
