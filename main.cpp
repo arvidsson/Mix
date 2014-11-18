@@ -1,3 +1,4 @@
+// g++ main.cpp entity/world.cpp entity/entity.cpp entity/system.cpp -o main -std=c++11
 #include "entity/world.hpp"
 #include <iostream>
 using namespace entity;
