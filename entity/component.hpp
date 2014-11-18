@@ -4,13 +4,10 @@
 #include <cstdint>
 #include <cassert>
 
-namespace libes {
+namespace entity {
 
     // The maximum number of different component classes we can have.
     const std::uint32_t max_components = 64;
-
-    // A bitfield where flags corresponding to our different component classes can be set or reset.
-    typedef std::bitset<max_components> ComponentFlags;
 
     // Base class used to automatically increment the component type id.
     class BaseComponent {

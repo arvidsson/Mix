@@ -9,13 +9,14 @@
 
 namespace entity {
 
+    class World;
     class EntityManager;
 
     class Entity {
     public:
         typedef std::uint32_t Id;
 
-        Entity(Id id, EntityManager &entity_manager) : id(id), entity_manager(entity_manager) {}
+        Entity(Id id, World &world);
 
         Id get_id() const { return id; }
 
@@ -26,12 +27,16 @@ namespace entity {
         T& get_component();
 
     private:
+        EntityManager& get_entity_manager();
+
         Id id;
-        EntityManager &entity_manager;
+        World &world;
     };
 
     class EntityManager {
     public:
+        EntityManager(World &world);
+
         Entity::Id create_entity();
         void remove_entity(Entity::Id id);
 
@@ -39,7 +44,7 @@ namespace entity {
         void add_component(Entity::Id id, Args && ... args);
 
         template <typename T>
-        T& GetComponent(Entity::Id id);
+        T& get_component(Entity::Id id);
 
     private:
         static Entity::Id id_counter;
@@ -52,16 +57,18 @@ namespace entity {
 
         // available entity ids
         std::vector<Entity::Id> reusable_ids;
+
+        World &world;
     };
 
     template <typename T, typename ... Args>
     void Entity::add_component(Args && ... args) {
-        entity_manager.add_component<T>(id, std::forward<Args>(args)...);
+        get_entity_manager().add_component<T>(id, std::forward<Args>(args)...);
     }
 
     template <typename T>
     T& Entity::get_component() {
-        return entity_manager.get_component<T>(id);
+        return get_entity_manager().get_component<T>(id);
     }
 
     template <typename T, typename ... Args>

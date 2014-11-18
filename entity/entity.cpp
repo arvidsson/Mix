@@ -1,4 +1,5 @@
 #include "entity.hpp"
+#include "world.hpp"
 #include <cassert>
 
 namespace entity {
@@ -6,6 +7,14 @@ namespace entity {
     BaseComponent::Type BaseComponent::type_counter = 0;
 
     Entity::Id EntityManager::id_counter = 0;
+
+    Entity::Entity(Id id, World &world) : id(id), world(world) {}
+
+    EntityManager& Entity::get_entity_manager() {
+        world.get_entity_manager();
+    }
+
+    EntityManager::EntityManager(World &world) : world(world) {}
 
     Entity::Id EntityManager::create_entity() {
         Entity::Id id;
