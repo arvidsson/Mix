@@ -17,5 +17,7 @@ int main() {
 
     cout << "x: " << pc.x << ", y: " << pc.y << endl;
 
+    e.kill();
+
     return 0;
 }

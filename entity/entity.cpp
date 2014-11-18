@@ -14,6 +14,10 @@ namespace entity {
         world.get_entity_manager();
     }
 
+    void Entity::kill() {
+        world.destroy_entity(*this);
+    }
+
     EntityManager::EntityManager(World &world) : world(world) {}
 
     Entity::Id EntityManager::create_entity() {

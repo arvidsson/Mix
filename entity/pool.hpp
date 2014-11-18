@@ -1,5 +1,5 @@
-#ifndef ENTITY_POOL_INCLUDED
-#define ENTITY_POOL_INCLUDED
+#ifndef POOL_INCLUDED
+#define POOL_INCLUDED
 
 #include <vector>
 

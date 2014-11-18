@@ -26,6 +26,8 @@ namespace entity {
         template <typename T>
         T& get_component();
 
+        void kill();
+
     private:
         EntityManager& get_entity_manager();
 
