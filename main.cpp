@@ -9,6 +9,11 @@ struct PositionComponent : Component<PositionComponent> {
     int x, y;
 };
 
+struct VelocityComponent : Component<VelocityComponent> {
+    VelocityComponent(int dx = 0, int dy = 0) : dx(dx), dy(dy) {}
+    int dx, dy;
+};
+
 int main() {
     World world;
     Entity e = world.create_entity();
@@ -19,6 +24,9 @@ int main() {
     cout << "x: " << pc.x << ", y: " << pc.y << endl;
 
     e.remove();
+
+    cout << "pos id: " << PositionComponent::get_type_id() << endl;
+    cout << "vel id: " << VelocityComponent::get_type_id() << endl;
 
     return 0;
 }

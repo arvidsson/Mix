@@ -2,32 +2,37 @@
 #define SYSTEM_INCLUDED
 
 #include "entity.hpp"
-#include "event.hpp"
-#include <vector>
 #include <unordered_map>
-#include <cstdint>
 
 namespace entity {
 
     class World;
     class SystemManager;
 
-    class BaseSystem {
-    public:
-        typedef std::uint32_t Type;
-
-        virtual void update(float delta) = 0;
-
-    protected:
-        static Type type_counter;
+    struct BaseEvent {
+        virtual ~BaseEvent() {}
     };
 
-    template <typename T>
+    // Derive your events from this one!
+    template <typename TDerivedEvent>
+    struct Event : BaseEvent {
+        static TypeId get_type_id() {
+            return TypeIdHelper<BaseEvent>::get_type_id<TDerivedEvent>();
+        }
+    };
+
+    class BaseSystem {
+    public:
+        virtual ~BaseSystem() {}
+        virtual void update(float delta) = 0;
+    };
+
+    // Derive your systems from this one!
+    template <typename TDerivedSystem>
     class System : public BaseSystem {
     public:
-        static Type get_type() {
-            static Type type = type_counter++;
-            return type;
+        static TypeId get_type_id() {
+            return TypeIdHelper<BaseSystem>::get_type_id<TDerivedSystem>();
         }
 
         std::vector<Entity> get_entities() { return entities; }
@@ -49,21 +54,21 @@ namespace entity {
         void add_system();
 
     private:
-        std::unordered_map<BaseSystem::Type, std::shared_ptr<BaseSystem>> systems;
+        std::unordered_map<TypeId, std::shared_ptr<BaseSystem>> systems;
         World &world;
     };
 
     template <typename T>
     template <typename U>
     void System<T>::requires_component() {
-        required_components.set(U::get_type());
+        required_components.set(U::get_type_id());
     }
 
     template <typename T>
     void SystemManager::add_system() {
         std::shared_ptr<T> system(new T);
         //system->systemManager = this;
-        systems.insert(std::make_pair(T::get_type(), system));
+        systems.insert(std::make_pair(T::get_type_id(), system));
     }
 
 }

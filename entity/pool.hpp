@@ -2,6 +2,7 @@
 #define POOL_INCLUDED
 
 #include <vector>
+#include <cassert>
 
 namespace entity {
 

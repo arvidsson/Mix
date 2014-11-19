@@ -1,17 +1,14 @@
 #include "entity.hpp"
 #include "world.hpp"
-#include <cassert>
 
 namespace entity {
-
-    BaseComponent::Type BaseComponent::type_counter = 0;
 
     Entity::Id EntityManager::id_counter = 0;
 
     Entity::Entity(Id id, World &world) : id(id), world(world) {}
 
     EntityManager& Entity::get_entity_manager() {
-        world.get_entity_manager();
+        return world.get_entity_manager();
     }
 
     void Entity::refresh() {
