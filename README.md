@@ -25,10 +25,31 @@ You define new components by deriving from `Component`.
         int x, y;
     };
 
-When you're done adding components, you need to finalize the `Entity`.
+When you're done adding components, you need to refresh the `Entity`.
 
-    e.finalize();
+    e.refresh();
 
-This will make sure that every `System` gets updated so that it knows which entities to handle.
+This will make sure that every `System` gets refreshed so that it knows which entities to handle.
+You define new systems by deriving from `System`.
 
-TODO: document how to define new systems and how to use them...
+    class MoveSystem : System<MoveSystem> {
+        MoveSystem() {
+            require_component<PositionComponent>();
+            require_component<VelocityComponent>()
+        }
+
+        virtual void update(float delta) {
+            for (auto e : get_entities()) {
+                PositionComponent &pos = e.get_component<PositionComponent>();
+                const VelocityComponent &vel = e.get_component<VelocityComponent>();
+                pos.x += vel.x * delta;
+                pos.y += vel.y * delta;
+            }
+        }
+    };
+
+By using `require_component` in the system's constructor, we define what entities the system is interested in.
+All entities that have (at least) these two component types will be included in the vector of entities that the system
+want to do something with (the entity is put into this vector of interest when using `refresh` above).
+
+You also need to define an update method. It's in this method where the logic of the system takes place.
