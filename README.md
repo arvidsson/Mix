@@ -55,8 +55,8 @@ to define an `update()` method. It's in this method where the logic of the syste
 
 You need to add the system to the world's `SystemManager`.
 
-SystemManager &system_manager = world.get_system_manager();
-system_manager.add_system<MoveSystem>();
+    SystemManager &system_manager = world.get_system_manager();
+    system_manager.add_system<MoveSystem>();
 
 You need to control all the systems manually in your gameloop (as we don't know in which order you want to use them).
 
