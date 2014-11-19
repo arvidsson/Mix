@@ -3,28 +3,36 @@
 
 namespace entity {
 
-    World::World() : entity_manager(*this) {}
+    World::World() : entity_manager(*this), system_manager(*this) {}
 
     Entity World::create_entity() {
         return Entity(entity_manager.create_entity(), *this);
     }
 
-    void World::destroy_entity(Entity entity) {
-        auto it = std::find_if(destroyed.begin(),
-                               destroyed.end(),
-                               [&entity](const Entity &deleted_entity) {
-                                   return entity.get_id() == deleted_entity.get_id();
+    void World::refresh_entity(Entity entity) {
+        refreshed_entities.push_back(entity);
+    }
+
+    void World::remove_entity(Entity entity) {
+        auto it = std::find_if(removed_entities.begin(),
+                               removed_entities.end(),
+                               [&entity](const Entity &removed_entity) {
+                                   return entity.get_id() == removed_entity.get_id();
                                });
-        if (it == destroyed.end()) {
-            destroyed.push_back(entity);
+        if (it == removed_entities.end()) {
+            removed_entities.push_back(entity);
         }
     }
 
     void World::begin_frame() {
-        for (auto &entity : destroyed) {
+        for (auto &entity : refreshed_entities)
+            entity_manager.refresh_entity(entity.get_id());
+        refreshed_entities.clear();
+
+        for (auto &entity : removed_entities) {
             entity_manager.remove_entity(entity.get_id());
         }
-        destroyed.clear();
+        removed_entities.clear();
     }
 
 }

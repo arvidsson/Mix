@@ -26,7 +26,8 @@ namespace entity {
         template <typename T>
         T& get_component();
 
-        void kill();
+        void refresh();
+        void remove();
 
     private:
         EntityManager& get_entity_manager();
@@ -40,6 +41,7 @@ namespace entity {
         EntityManager(World &world);
 
         Entity::Id create_entity();
+        void refresh_entity(Entity::Id id);
         void remove_entity(Entity::Id id);
 
         template <typename T, typename ... Args>

@@ -14,8 +14,12 @@ namespace entity {
         world.get_entity_manager();
     }
 
-    void Entity::kill() {
-        world.destroy_entity(*this);
+    void Entity::refresh() {
+        world.refresh_entity(*this);
+    }
+
+    void Entity::remove() {
+        world.remove_entity(*this);
     }
 
     EntityManager::EntityManager(World &world) : world(world) {}
@@ -36,6 +40,11 @@ namespace entity {
         }
 
         return id;
+    }
+
+    void EntityManager::refresh_entity(Entity::Id id) {
+        Entity entity(id, world);
+        //world.get_system_manager().refresh_systems(entity); // TODO: call this something else?
     }
 
     void EntityManager::remove_entity(Entity::Id id) {
