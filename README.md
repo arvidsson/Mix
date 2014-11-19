@@ -48,8 +48,24 @@ You define new systems by deriving from `System`.
         }
     };
 
-By using `require_component` in the system's constructor, we define what entities the system is interested in.
+By using `require_component<T>()` in the system's constructor, we define what entities the system is interested in.
 All entities that have (at least) these two component types will be included in the vector of entities that the system
-want to do something with (the entity is put into this vector of interest when using `refresh` above).
+want to do something with (the entity is put into this vector of interest when using `refresh()` above). You also need
+to define an `update()` method. It's in this method where the logic of the system takes place.
 
-You also need to define an update method. It's in this method where the logic of the system takes place.
+You need to add the system to the world's `SystemManager`.
+
+SystemManager &system_manager = world.get_system_manager();
+system_manager.add_system<MoveSystem>();
+
+You need to control all the systems manually in your gameloop (as we don't know in which order you want to use them).
+
+    world.begin_frame();
+    MoveSystem &move_system = world.get_system_manager().get_system<MoveSystem>();
+    move_system.update();
+
+You need to call `begin_frame()` before you update any of the systems. The reason behind this is that when you `refresh()` or `kill()`
+an entity, the world delays this action from happening until all the systems have had time to act upon the entity. So, it's only when
+a new frame (or game loop tick) begins that the created or killed entity system actually exists or is removed.
+
+TODO: what else do we need to explain?
