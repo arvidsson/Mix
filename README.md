@@ -58,14 +58,14 @@ You need to add the system to the world's `SystemManager`.
     SystemManager &system_manager = world.get_system_manager();
     system_manager.add_system<MoveSystem>();
 
-You need to control all the systems manually in your gameloop (as we don't know in which order you want to use them).
+You need to control all the systems manually in your game loop (as we don't know in which order you want to use them).
 
-    world.begin_frame();
+    world.begin();
     MoveSystem &move_system = world.get_system_manager().get_system<MoveSystem>();
     move_system.update();
 
-You need to call `begin_frame()` before you update any of the systems. The reason behind this is that when you `refresh()` or `kill()`
+You need to call `begin()` before you update any of the systems. The reason behind this is that when you `refresh()` or `remove()`
 an entity, the world delays this action from happening until all the systems have had time to act upon the entity. So, it's only when
-a new frame (or game loop tick) begins that the created or killed entity system actually exists or is removed.
+a new frame/tick in your game loop begins that the created or killed entity system actually exists or is removed (from the systems' point of view).
 
 TODO: what else do we need to explain?

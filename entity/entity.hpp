@@ -19,10 +19,10 @@ namespace entity {
     };
 
     // Derive your components from this one!
-    template <typename TDerivedComponent>
+    template <typename TComponent>
     struct Component : BaseComponent {
         static TypeId get_type_id() {
-            TypeId type_id = TypeIdHelper<BaseComponent>::get_type_id<TDerivedComponent>();
+            TypeId type_id = TypeIdHelper<BaseComponent>::get_type_id<TComponent>();
             assert(type_id < max_components);
             return type_id;
         }
@@ -40,13 +40,20 @@ namespace entity {
         void add_component(Args && ... args);
 
         template <typename TComponent>
+        void remove_component();
+
+        template <typename TComponent>
         TComponent& get_component();
+
+        template <typename TComponent>
+        bool has_component() const;
 
         void refresh();
         void remove();
 
     private:
         EntityManager& get_entity_manager();
+        const EntityManager& get_entity_manager() const;
 
         Id id;
         World &world;
@@ -64,10 +71,18 @@ namespace entity {
         void add_component(Entity::Id id, Args && ... args);
 
         template <typename TComponent>
+        void remove_component(Entity::Id id);
+
+        template <typename TComponent>
         TComponent& get_component(Entity::Id id);
 
+        template <typename TComponent>
+        bool has_component(Entity::Id id) const;
+
+        std::bitset<max_components> get_components_for_entity(Entity::Id id);
+
     private:
-        static Entity::Id id_counter;
+        static Entity::Id next_id;
 
         // vector index = component type, pool index = entity id
         std::vector<std::shared_ptr<BasePool>> component_pools;
@@ -87,8 +102,18 @@ namespace entity {
     }
 
     template <typename TComponent>
+    void Entity::remove_component() {
+        get_entity_manager().remove_component<TComponent>(id);
+    }
+
+    template <typename TComponent>
     TComponent& Entity::get_component() {
         return get_entity_manager().get_component<TComponent>(id);
+    }
+
+    template <typename TComponent>
+    bool Entity::has_component() const {
+        return get_entity_manager().has_component<TComponent>(id);
     }
 
     template <typename TComponent, typename ... Args>
@@ -108,11 +133,23 @@ namespace entity {
             pool = std::static_pointer_cast<Pool<TComponent>>(component_pools[type_id]);
         }
 
-        pool->reserve(id_counter);
+        pool->reserve(next_id);
         TComponent component(std::forward<Args>(args) ...);
         pool->set(id, component);
 
         components_per_entity[id].set(type_id);
+    }
+
+    template <typename TComponent>
+    void EntityManager::remove_component(Entity::Id id) {
+        assert(id < components_per_entity.size());
+        const TypeId type_id = TComponent::get_type_id();
+        assert(type_id < component_pools.size());
+        components_per_entity[id].reset(type_id);
+
+        std::shared_ptr<Pool<TComponent>> pool = std::static_pointer_cast<Pool<TComponent>>(component_pools[type_id]);
+        assert(pool);
+        pool->set(id, 0);
     }
 
     template <typename TComponent>
@@ -122,6 +159,13 @@ namespace entity {
         std::shared_ptr<Pool<TComponent>> pool = std::static_pointer_cast<Pool<TComponent>>(component_pools[type_id]);
         assert(pool);
         return pool->get(id);
+    }
+
+    template <typename TComponent>
+    bool EntityManager::has_component(Entity::Id id) const {
+        assert(id < components_per_entity.size());
+        const TypeId type_id = TComponent::get_type_id();
+        return components_per_entity[id].test(type_id);
     }
 
 }

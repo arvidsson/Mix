@@ -24,7 +24,7 @@ namespace entity {
         }
     }
 
-    void World::begin_frame() {
+    void World::begin() {
         for (auto &entity : refreshed_entities)
             entity_manager.refresh_entity(entity.get_id());
         refreshed_entities.clear();

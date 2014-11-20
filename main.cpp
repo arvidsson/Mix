@@ -1,4 +1,4 @@
-// g++ main.cpp entity/world.cpp entity/entity.cpp entity/system.cpp -o main -std=c++11
+// g++ main.cpp entity/world.cpp entity/entity.cpp entity/system.cpp -o main -std=c++11 -Wall -pedantic
 #include "entity/world.hpp"
 #include <iostream>
 using namespace entity;
@@ -14,10 +14,25 @@ struct VelocityComponent : Component<VelocityComponent> {
     int dx, dy;
 };
 
+class MoveSystem : public System<MoveSystem> {
+public:
+    MoveSystem() {
+        require_component<PositionComponent>();
+    }
+
+    virtual void update(float delta) {
+        cout << "i moved!" << endl;
+    }
+};
+
 int main() {
     World world;
     Entity e = world.create_entity();
     e.add_component<PositionComponent>(50, 50);
+    world.get_system_manager().add_system<MoveSystem>();
+
+    MoveSystem& ms = world.get_system_manager().get_system<MoveSystem>();
+    ms.update(1.0f);
 
     PositionComponent &pc = e.get_component<PositionComponent>();
 

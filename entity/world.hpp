@@ -17,7 +17,7 @@ namespace entity {
         Entity create_entity();
         void refresh_entity(Entity entity);
         void remove_entity(Entity entity);
-        void begin_frame();
+        void begin();
 
     private:
         EntityManager entity_manager;
