@@ -8,6 +8,7 @@ brief synopsis
 Everything begins with a world.
 
 ```c++
+#include "entity/world.hpp"
 World world;
 ```
 
@@ -36,8 +37,7 @@ struct PositionComponent
 The entities interact with the world through systems. You can add systems to the world by using its system manager.
 
 ```c++
-auto &system_manager = world.get_system_manager();
-system_manager.add_system<MoveSystem>();
+world.get_system_manager().add_system<MoveSystem>();
 ```
 
 Before you add systems, you must define them.
