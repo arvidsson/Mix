@@ -5,26 +5,25 @@ A minimal entity-component system
 
 brief synopsis
 --------------
-Everything begins with a ```World```. The ```World``` contains an ```EntityManager```, a ```SystemManager``` and an ```EventManager```.
+Everything begins with a ```World```.
 
 ```c++
 World world;
 ```
 
-You use the world to create an ```Entity```.
+You use the world to create entities.
 
 ```c++
 auto e = world.create_entity();
 ```
 
-The ```Entity``` is just a helper class that encapsulates an id. You can use this class
-to add components to the entity.
+An entity is basically just an id. You can add components to entities.
 
 ```c++
 e.add_component<PositionComponent>(100, 100);
 ```
 
-You define new components like this:
+Before you add components, you must define them.
 
 ```c++
 struct PositionComponent
