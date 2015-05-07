@@ -1,38 +1,69 @@
 #include "world.hpp"
-#include <algorithm>
+#include <cassert>
 
-namespace entity {
+namespace entity
+{
 
-    World::World() : entity_manager(*this), system_manager(*this) {}
-
-    Entity World::create_entity() {
-        return Entity(entity_manager.create_entity(), *this);
+    World::World()
+    {
+        entity_manager = std::make_unique<EntityManager>(*this);
+        system_manager = std::make_unique<SystemManager>(*this);
+        event_manager = std::make_unique<EventManager>(*this);
     }
 
-    void World::refresh_entity(Entity entity) {
-        refreshed_entities.push_back(entity);
+    EntityManager& World::get_entity_manager() const
+    {
+        assert(entity_manager != nullptr);
+        return *entity_manager;
     }
 
-    void World::remove_entity(Entity entity) {
-        auto it = std::find_if(removed_entities.begin(),
-                               removed_entities.end(),
-                               [&entity](const Entity &removed_entity) {
-                                   return entity.get_id() == removed_entity.get_id();
-                               });
-        if (it == removed_entities.end()) {
-            removed_entities.push_back(entity);
+    SystemManager& World::get_system_manager() const
+    {
+        assert(system_manager != nullptr);
+        return *system_manager;
+    }
+
+    EventManager& World::get_event_manager() const
+    {
+        assert(event_manager != nullptr);
+        return *event_manager;
+    }
+
+    void World::update()
+    {
+        for (auto e : created_entities) {
+            get_system_manager().update_systems(e);
         }
+        created_entities.clear();
+
+        for (auto e : killed_entities) {
+            get_entity_manager().destroy_entity(e);
+        }
+        killed_entities.clear();
+
+        get_event_manager().destroy_events();
     }
 
-    void World::begin() {
-        for (auto &entity : refreshed_entities)
-            entity_manager.refresh_entity(entity.get_id());
-        refreshed_entities.clear();
+    Entity World::create_entity()
+    {
+        auto e = get_entity_manager().create_entity();
+        created_entities.push_back(e);
+        return e;
+    }
 
-        for (auto &entity : removed_entities) {
-            entity_manager.remove_entity(entity.get_id());
-        }
-        removed_entities.clear();
+    void World::kill_entity(Entity e)
+    {
+        killed_entities.push_back(e);
+    }
+
+    Entity World::get_entity(std::string tag_name) const
+    {
+        return get_entity_manager().get_entity_by_tag(tag_name);
+    }
+
+    std::vector<Entity> World::get_entity_group(std::string group_name) const
+    {
+        return get_entity_manager().get_entity_group(group_name);
     }
 
 }

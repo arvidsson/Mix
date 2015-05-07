@@ -1,89 +1,119 @@
-#ifndef SYSTEM_INCLUDED
-#define SYSTEM_INCLUDED
+#pragma once
 
+#include "event.hpp"
 #include "entity.hpp"
+#include <vector>
 #include <unordered_map>
+#include <typeindex>
+#include <memory>
 
-namespace entity {
-
-    class World;
+namespace entity
+{
     class SystemManager;
+    class World;
 
-    struct BaseEvent {
-        virtual ~BaseEvent() {}
-    };
-
-    // Derive your events from this one!
-    template <typename TDerivedEvent>
-    struct Event : BaseEvent {
-        static TypeId get_type_id() {
-            return TypeIdHelper<BaseEvent>::get_type_id<TDerivedEvent>();
-        }
-    };
-
-    class BaseSystem {
+    // The system processes entities that it's interested in each frame. Derive from this one!
+    class System
+    {
     public:
-        virtual ~BaseSystem() {}
-        virtual void update(float delta) = 0;
+        virtual ~System() {}
 
-        std::vector<Entity> get_entities() { return entities; }
+        // override this!
+        virtual void update(float dt = 0.0f) = 0;
 
-        template <typename TComponent>
+        // what component types the system requires of entities (we can use this method in the constructor for example)
+        template <typename T>
         void require_component();
 
+        // returns a list of entities that the system should process each frame
+        std::vector<Entity> get_entities() { return entities; }
+
+        // adds an entity of interest
+        void add_entity(Entity e);
+
+        // if the entity is not alive anymore (during processing), the entity should be removed
+        void remove_entity(Entity e);
+
+        const ComponentMask& get_component_mask() const { return component_mask; }
+
     private:
-        std::bitset<max_components> required_components;
-        std::vector<Entity> entities; // all components that has the above required components
+        World& get_world() const;
 
+        // which components an entity must have in order for the system to process the entity
+        ComponentMask component_mask;
+
+        // vector of all entities that the system is interested in
+        std::vector<Entity> entities;
+
+        World *world = nullptr;
         friend class SystemManager;
-    };
-
-    // Derive your systems from this one!
-    template <typename TSystem>
-    class System : public BaseSystem {
-    public:
-        static TypeId get_type_id() {
-            return TypeIdHelper<BaseSystem>::get_type_id<TSystem>();
-        }
     };
 
     class SystemManager
     {
     public:
-        SystemManager(World &world);
+        SystemManager(World &world) : world(world) {}
 
-        template <typename TSystem>
-        void add_system();
+        /* System */
+        template <typename T> void add_system();
+        template <typename T> void remove_system();
+        template <typename T> T& get_system();
+        template <typename T> bool has_system() const;
 
-        template <typename TSystem>
-        TSystem& get_system();
-
-        void refresh_systems(Entity entity);
+        // adds an entity to each system that is interested of the entity
+        void update_systems(Entity e);
 
     private:
-        std::unordered_map<TypeId, std::shared_ptr<BaseSystem>> systems;
+        std::unordered_map<std::type_index, std::shared_ptr<System>> systems;
+
         World &world;
     };
 
-    template <typename TComponent>
-    void BaseSystem::require_component() {
-        required_components.set(TComponent::get_type_id());
+    template <typename T>
+    void System::require_component()
+    {
+        const auto component_id = Component<T>::get_id();
+        component_mask.set(component_id);
     }
 
-    template <typename TSystem>
-    void SystemManager::add_system() {
-        std::shared_ptr<TSystem> system(new TSystem);
-        //system->systemManager = this;
-        systems.insert(std::make_pair(TSystem::get_type_id(), system));
+    template <typename T>
+    void SystemManager::add_system()
+    {
+        if (has_system<T>()) {
+            return;
+        }
+
+        std::shared_ptr<T> system(new T);
+        system->world = &world;
+        systems.insert(std::make_pair(std::type_index(typeid(T)), system));
     }
 
-    template <typename TSystem>
-    TSystem& SystemManager::get_system() {
-        auto it = systems.find(TSystem::get_type_id());
-        assert(it != systems.end());
-        return *(std::static_pointer_cast<TSystem>(it->second));
+    template <typename T>
+    void SystemManager::remove_system()
+    {
+        if (!has_system<T>()) {
+            return;
+        }
+
+        auto it = systems.find(std::type_index(typeid(T)));
+        systems.erase(it);
+    }
+
+    template <typename T>
+    T& SystemManager::get_system()
+    {
+        if (!has_system<T>()) {
+            throw std::runtime_error(std::string("Failed to get system: ") + typeid(T).name());
+        }
+
+        auto it = systems.find(std::type_index(typeid(T)));
+        return *(std::static_pointer_cast<T>(it->second));
+    }
+
+    template <typename T>
+    bool SystemManager::has_system() const
+    {
+        return systems.find(std::type_index(typeid(T))) != systems.end();
     }
 
 }
-
-#endif

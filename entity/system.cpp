@@ -1,18 +1,39 @@
 #include "system.hpp"
 #include "world.hpp"
-#include <cassert>
+#include <algorithm>
 
-namespace entity {
+namespace entity
+{
 
-    SystemManager::SystemManager(World &world) : world(world) {}
+    void System::add_entity(Entity e)
+    {
+        entities.push_back(e);
+    }
 
-    void SystemManager::refresh_systems(Entity entity) {
+    void System::remove_entity(Entity e)
+    {
+        entities.erase(std::remove_if(entities.begin(), entities.end(),
+            [&e](Entity other) { return e == other; }
+        ), entities.end());
+    }
+
+    World& System::get_world() const
+    {
+        assert(world != nullptr);
+        return *world;
+    }
+
+    void SystemManager::update_systems(Entity e)
+    {
+        const auto &entity_component_mask = world.get_entity_manager().get_component_mask(e);
+
         for (auto &it : systems) {
             auto system = it.second;
-            auto components = world.get_entity_manager().get_components_for_entity(entity.get_id());
-            bool interest = (components & system->required_components) == components;
+            const auto &system_component_mask = system->get_component_mask();
+            auto interest = (entity_component_mask & system_component_mask) == system_component_mask;
+
             if (interest) {
-                system->entities.push_back(entity);
+                system->add_entity(e);
             }
         }
     }
