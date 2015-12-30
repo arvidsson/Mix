@@ -6,76 +6,76 @@
 namespace entity
 {
 
-    // Base class so we can have a vector of pools containing different object types.
-    class BasePool
+// Base class so we can have a vector of pools containing different object types.
+class BasePool
+{
+public:
+    virtual ~BasePool() {};
+    virtual void Clear() = 0;
+};
+
+// A pool is just a vector (contiguous data) of objects of type T.
+template <typename T>
+class Pool : public BasePool
+{
+public:
+    Pool(int size = 100)
     {
-    public:
-        virtual ~BasePool() {};
-        virtual void clear() = 0;
-    };
+        Resize(size);
+    }
 
-    // A pool is just a vector (contiguous data) of objects of type T.
-    template <typename T>
-    class Pool : public BasePool
+    virtual ~Pool() {};
+
+    bool IsEmpty() const
     {
-    public:
-        Pool(int size = 100)
-        {
-            resize(size);
-        }
+        return data.empty();
+    }
 
-        virtual ~Pool() {};
+    unsigned int GetSize() const
+    {
+        return data.size();
+    }
 
-        bool is_empty() const
-        {
-            return data.empty();
-        }
+    void Resize(int n)
+    {
+        data.resize(n);
+    }
 
-        unsigned int get_size() const
-        {
-            return data.size();
-        }
+    void Clear()
+    {
+        data.clear();
+    }
 
-        void resize(int n)
-        {
-            data.resize(n);
-        }
+    bool Set(unsigned int index, T object)
+    {
+        assert(index < GetSize());
+        data[index] = object;
+        return true;
+    }
 
-        void clear()
-        {
-            data.clear();
-        }
+    T& Get(unsigned int index)
+    {
+        assert(index < GetSize());
+        return static_cast<T&>(data[index]);
+    }
 
-        bool set(unsigned int index, T object)
-        {
-            assert(index < get_size());
-            data[index] = object;
-            return true;
-        }
+    void Add(T object)
+    {
+        data.push_back(object);
+    }
 
-        T& get(unsigned int index)
-        {
-            assert(index < get_size());
-            return static_cast<T&>(data[index]);
-        }
+    T& operator[](unsigned int index)
+    {
+        return data[index];
+    }
 
-        void add(T object)
-        {
-            data.push_back(object);
-        }
+    const T& operator[](unsigned int index) const
+    {
+        return data[index];
+    }
 
-        T& operator[](unsigned int index)
-        {
-            return data[index];
-        }
-
-        const T& operator[](unsigned int index) const
-        {
-            return data[index];
-        }
-
-    private:
-        std::vector<T> data;
-    };
+private:
+    std::vector<T> data;
+};
 
 }

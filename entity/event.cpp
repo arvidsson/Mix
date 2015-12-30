@@ -1,17 +1,17 @@
-#include "event.hpp"
-#include "world.hpp"
+#include "Event.hpp"
+#include "World.hpp"
 
 namespace entity
 {
 
-    BaseEvent::Id BaseEvent::id_counter = 0;
+BaseEvent::Id BaseEvent::idCounter = 0;
 
-    void EventManager::destroy_events()
-    {
-        for (auto &it : event_pools) {
-            auto pool = it.second;
-            pool->clear();
-        }
+void EventManager::DestroyEvents()
+{
+    for (auto &it : eventPools) {
+        auto pool = it.second;
+        pool->Clear();
     }
+}
 
 }

@@ -1,8 +1,8 @@
-#include "component.hpp"
+#include "Component.hpp"
 
 namespace entity
 {
 
-    BaseComponent::Id BaseComponent::id_counter = 0;
+BaseComponent::Id BaseComponent::idCounter = 0;
 
 }

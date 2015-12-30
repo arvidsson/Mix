@@ -1,129 +1,212 @@
-#include "entity.hpp"
-#include "world.hpp"
+#include "Entity.hpp"
+#include "World.hpp"
 #include <cassert>
 
 namespace entity
 {
 
-    void Entity::kill()
-    {
-        get_entity_manager().kill_entity(*this);
+void Entity::Kill()
+{
+    GetEntityManager().KillEntity(*this);
+}
+
+bool Entity::IsAlive() const
+{
+    return GetEntityManager().IsEntityAlive(*this);
+}
+
+void Entity::Tag(std::string tagName)
+{
+    GetEntityManager().TagEntity(*this, tagName);
+}
+
+bool Entity::HasTag(std::string tagName) const
+{
+    return GetEntityManager().HasTaggedEntity(tagName, *this);
+}
+
+void Entity::Group(std::string groupName)
+{
+    GetEntityManager().GroupEntity(*this, groupName);
+}
+
+bool Entity::HasGroup(std::string groupName) const
+{
+    return GetEntityManager().HasEntityInGroup(groupName, *this);
+}
+
+std::string Entity::ToString() const
+{
+    std::string s = "entity id: " + std::to_string(GetIndex()) + ", version: " + std::to_string(GetVersion());
+    return s;
+}
+
+EntityManager& Entity::GetEntityManager() const
+{
+    assert(entityManager != nullptr);
+    return *entityManager;
+}
+
+Entity EntityManager::CreateEntity()
+{
+    Entity::Id index;
+
+    if (freeIds.size() > MinimumFreeIds) {
+        index = freeIds.front();
+        freeIds.pop_front();
     }
+    else {
+        versions.push_back(0);
+        index = (unsigned int)versions.size() - 1;
+        assert(index < (1 << Entity::IndexBits));
 
-    bool Entity::is_alive() const
-    {
-        return get_entity_manager().is_entity_alive(*this);
-    }
-
-    void Entity::tag(std::string tag_name)
-    {
-        get_entity_manager().tag_entity(*this, tag_name);
-    }
-
-    void Entity::group(std::string group_name)
-    {
-        get_entity_manager().group_entity(*this, group_name);
-    }
-
-    std::string Entity::to_string() const
-    {
-        std::string s = "entity id: " + std::to_string(get_index()) + ", version: " + std::to_string(get_version());
-        return s;
-    }
-
-    EntityManager& Entity::get_entity_manager() const
-    {
-        assert(entity_manager != nullptr);
-        return *entity_manager;
-    }
-
-    Entity EntityManager::create_entity()
-    {
-        Entity::Id index;
-
-        if (free_ids.size() > MINIMUM_FREE_IDS) {
-            index = free_ids.front();
-            free_ids.pop_front();
+        if (index >= componentMasks.size()) {
+            // TODO: grow by doubling?
+            componentMasks.resize(index + 1);
         }
-        else {
-            versions.push_back(0);
-            index = (unsigned int)versions.size() - 1;
-            assert(index < (1 << Entity::INDEX_BITS));
+    }
 
-            if (index >= component_masks.size()) {
-                // TODO: grow by doubling?
-                component_masks.resize(index + 1);
+    assert(index < versions.size());
+    Entity e(index, versions[index]);
+    e.entityManager = this;
+
+    return e;
+}
+
+void EntityManager::DestroyEntity(Entity e)
+{
+    const auto index = e.GetIndex();
+    assert(index < versions.size());        // sanity check
+    assert(index < componentMasks.size());
+    ++versions[index];                      // increase the version for that id
+    freeIds.push_back(index);               // make the id available for reuse
+    componentMasks[index].reset();          // reset the component mask for that id
+
+    // if tagged, remove entity from tag management
+    auto taggedEntity = entityTags.find(e.id);
+    if (taggedEntity != entityTags.end()) {
+        auto tag = taggedEntity->second;
+        taggedEntities.erase(tag);
+        entityTags.erase(taggedEntity);
+    }
+
+    // if in group, remove entity from group management
+    auto groupedEntity = entityGroups.find(e.id);
+    if (groupedEntity != entityGroups.end()) {
+        auto groupName = groupedEntity->second;
+        auto group = groupedEntities.find(groupName);
+        if (group != groupedEntities.end()) {
+            auto entityInGroup = group->second.find(e);
+            if (entityInGroup != group->second.end()) {
+                group->second.erase(entityInGroup);
             }
         }
+        entityGroups.erase(groupedEntity);
+    }
+}
 
-        assert(index < versions.size());
-        Entity e(index, versions[index]);
-        e.entity_manager = this;
+void EntityManager::KillEntity(Entity e)
+{
+    world.KillEntity(e);
+}
 
-        return e;
+bool EntityManager::IsEntityAlive(Entity e) const
+{
+    const auto index = e.GetIndex();
+    assert(index < versions.size());
+    return versions[index] == e.GetVersion();
+}
+
+Entity EntityManager::GetEntity(Entity::Id index)
+{
+    assert(index < versions.size());
+    Entity e(index, versions[index]);
+    e.entityManager = this;
+    return e;
+}
+
+const ComponentMask& EntityManager::GetComponentMask(Entity e) const
+{
+    const auto index = e.GetIndex();
+    assert(index < componentMasks.size());
+    return componentMasks[index];
+}
+
+void EntityManager::TagEntity(Entity e, std::string tagName)
+{
+    taggedEntities.emplace(tagName, e);
+    entityTags.emplace(e.id, tagName);
+}
+
+bool EntityManager::HasTag(std::string tagName) const
+{
+    return taggedEntities.find(tagName) != taggedEntities.end();
+}
+
+bool EntityManager::HasTaggedEntity(std::string tagName, Entity e) const
+{
+    auto it = taggedEntities.find(tagName);
+    if (it != taggedEntities.end()) {
+        if (it->second == e) {
+            return true;
+        }
+    }
+    return false;
+}
+
+Entity EntityManager::GetEntityByTag(std::string tagName)
+{
+    assert(HasTag(tagName));
+    return taggedEntities[tagName];
+}
+
+int EntityManager::GetTagCount() const
+{
+    return taggedEntities.size();
+}
+
+void EntityManager::GroupEntity(Entity e, std::string groupName)
+{
+    groupedEntities.emplace(groupName, std::set<Entity>());
+    groupedEntities[groupName].emplace(e);
+    entityGroups.emplace(e.id, groupName);
+}
+
+bool EntityManager::HasGroup(std::string groupName) const
+{
+    return groupedEntities.find(groupName) != groupedEntities.end();
+}
+
+bool EntityManager::HasEntityInGroup(std::string groupName, Entity e) const
+{
+    auto it = groupedEntities.find(groupName);
+    if (it != groupedEntities.end()) {
+        if (it->second.find(e.id) != it->second.end()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+std::vector<Entity> EntityManager::GetEntityGroup(std::string groupName)
+{
+    assert(HasGroup(groupName));
+    auto &s = groupedEntities[groupName];
+    return std::vector<Entity>(s.begin(), s.end());
+}
+
+int EntityManager::GetGroupCount() const
+{
+    return groupedEntities.size();
+}
+
+int EntityManager::GetEntityGroupCount(std::string groupName)
+{
+    if (!HasGroup(groupName)) {
+        return 0;
     }
 
-    void EntityManager::destroy_entity(Entity e)
-    {
-        const auto index = e.get_index();
-        assert(index < versions.size());        // sanity check
-        assert(index < component_masks.size());
-        ++versions[index];                      // increase the version for that id
-        free_ids.push_back(index);              // make the id available for reuse
-        component_masks[index].reset();         // reset the component mask for that id
-    }
-
-    void EntityManager::kill_entity(Entity e)
-    {
-        world.kill_entity(e);
-    }
-
-    bool EntityManager::is_entity_alive(Entity e) const
-    {
-        const auto index = e.get_index();
-        assert(index < versions.size());
-        return versions[index] == e.get_version();
-    }
-
-    const ComponentMask& EntityManager::get_component_mask(Entity e) const
-    {
-        const auto index = e.get_index();
-        assert(index < component_masks.size());
-        return component_masks[index];
-    }
-
-    void EntityManager::tag_entity(Entity e, std::string tag_name)
-    {
-        tagged_entities.emplace(tag_name, e);
-    }
-
-    bool EntityManager::has_tagged_entity(std::string tag_name) const
-    {
-        return tagged_entities.find(tag_name) != tagged_entities.end();
-    }
-
-    Entity EntityManager::get_entity_by_tag(std::string tag_name)
-    {
-        assert(has_tagged_entity(tag_name));
-        return tagged_entities[tag_name];
-    }
-
-    void EntityManager::group_entity(Entity e, std::string group_name)
-    {
-        entity_groups.emplace(group_name, std::set<Entity>());
-        entity_groups[group_name].emplace(e);
-    }
-
-    bool EntityManager::has_entity_group(std::string group_name) const
-    {
-        return entity_groups.find(group_name) != entity_groups.end();
-    }
-
-    std::vector<Entity> EntityManager::get_entity_group(std::string group_name)
-    {
-        assert(has_entity_group(group_name));
-        auto &s = entity_groups[group_name];
-        return std::vector<Entity>(s.begin(), s.end());
-    }
+    return groupedEntities[groupName].size();
+}
 
 }

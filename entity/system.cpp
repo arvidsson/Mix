@@ -1,41 +1,49 @@
-#include "system.hpp"
-#include "world.hpp"
+#include "System.hpp"
+#include "World.hpp"
 #include <algorithm>
 
 namespace entity
 {
 
-    void System::add_entity(Entity e)
-    {
-        entities.push_back(e);
-    }
+void System::AddEntity(Entity e)
+{
+    entities.push_back(e);
+}
 
-    void System::remove_entity(Entity e)
-    {
-        entities.erase(std::remove_if(entities.begin(), entities.end(),
-            [&e](Entity other) { return e == other; }
-        ), entities.end());
-    }
+void System::RemoveEntity(Entity e)
+{
+    entities.erase(std::remove_if(entities.begin(), entities.end(),
+        [&e](Entity other) { return e == other; }
+    ), entities.end());
+}
 
-    World& System::get_world() const
-    {
-        assert(world != nullptr);
-        return *world;
-    }
+World& System::GetWorld() const
+{
+    assert(world != nullptr);
+    return *world;
+}
 
-    void SystemManager::update_systems(Entity e)
-    {
-        const auto &entity_component_mask = world.get_entity_manager().get_component_mask(e);
+void SystemManager::AddToSystems(Entity e)
+{
+    const auto &entityComponentMask = world.GetEntityManager().GetComponentMask(e);
 
-        for (auto &it : systems) {
-            auto system = it.second;
-            const auto &system_component_mask = system->get_component_mask();
-            auto interest = (entity_component_mask & system_component_mask) == system_component_mask;
+    for (auto &it : systems) {
+        auto &system = it.second;
+        const auto &systemComponentMask = system->GetComponentMask();
+        auto interest = (entityComponentMask & systemComponentMask) == systemComponentMask;
 
-            if (interest) {
-                system->add_entity(e);
-            }
+        if (interest) {
+            system->AddEntity(e);
         }
     }
+}
+
+void SystemManager::RemoveFromSystems(Entity e)
+{
+    for (auto &it : systems) {
+        auto &system = it.second;
+        system->RemoveEntity(e);
+    }
+}
 
 }

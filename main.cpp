@@ -20,29 +20,29 @@ class MoveSystem : public System
 public:
     MoveSystem()
     {
-        require_component<PositionComponent>();
+        RequireComponent<PositionComponent>();
     }
 
-    virtual void update(float delta)
+    void Update()
     {
-        cout << "i moved!" << endl;
+        cout << "I moved!" << endl;
     }
 };
 
 int main()
 {
     World world;
-    Entity e = world.create_entity();
-    e.add_component<PositionComponent>(50, 50);
-    world.get_system_manager().add_system<MoveSystem>();
+    auto e = world.CreateEntity();
+    e.AddComponent<PositionComponent>(50, 50);
+    world.GetSystemManager().AddSystem<MoveSystem>();
 
-    world.update();
-    MoveSystem& ms = world.get_system_manager().get_system<MoveSystem>();
-    ms.update(1.0f);
+    world.Update();
+    auto& moveSystem = world.GetSystemManager().GetSystem<MoveSystem>();
+    moveSystem.Update();
 
-    PositionComponent &pc = e.get_component<PositionComponent>();
+    auto &position = e.GetComponent<PositionComponent>();
 
-    cout << "x: " << pc.x << ", y: " << pc.y << endl;
+    cout << "x: " << position.x << ", y: " << position.y << endl;
 
     return 0;
 }
