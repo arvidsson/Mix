@@ -1,7 +1,6 @@
 #include "entity/world.hpp"
 #include <iostream>
 using namespace entity;
-using namespace std;
 
 struct PositionComponent
 {
@@ -21,11 +20,17 @@ public:
     MoveSystem()
     {
         RequireComponent<PositionComponent>();
+        RequireComponent<VelocityComponent>();
     }
 
     void Update()
     {
-        cout << "I moved!" << endl;
+        for (auto e : GetEntities()) {
+            auto &position = e.GetComponent<PositionComponent>();
+            const auto velocity = e.GetComponent<VelocityComponent>();
+            position.x += velocity.x;
+            position.y += velocity.y;
+        }
     }
 };
 
@@ -34,15 +39,15 @@ int main()
     World world;
     auto e = world.CreateEntity();
     e.AddComponent<PositionComponent>(50, 50);
+    e.AddComponent<VelocityComponent>(10, 0);
     world.GetSystemManager().AddSystem<MoveSystem>();
 
-    world.Update();
-    auto& moveSystem = world.GetSystemManager().GetSystem<MoveSystem>();
-    moveSystem.Update();
-
-    auto &position = e.GetComponent<PositionComponent>();
-
-    cout << "x: " << position.x << ", y: " << position.y << endl;
+    for (int i = 0; i < 10; i++) {
+        world.Update();
+        world.GetSystemManager().GetSystem<MoveSystem>().Update();
+        auto &position = e.GetComponent<PositionComponent>();
+        std::cout << "x: " << position.x << ", y: " << position.y << std::endl;
+    }
 
     return 0;
 }
