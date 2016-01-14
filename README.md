@@ -29,7 +29,7 @@ class MoveSystem : public System
 public:
     MoveSystem()
     {
-        // 2a. specify what components an entity must have in order for the system to be interested in the entity
+        // 2a. specify what components an entity must have for the system to be interested in the entity
         RequireComponent<PositionComponent>();
         RequireComponent<VelocityComponent>();
     }
