@@ -69,7 +69,8 @@ world.GetSystemManager().AddSystem<MoveSystem>();
 auto e = world.CreateEntity();
 e.AddComponent<PositionComponent>(100, 100);
 e.AddComponent<VelocityComponent>(10, 10);
-// entity is created on the next call to world.Update(), so that no entities appear only for some systems mid-frame
+// entity is created on the next call to world.Update(),
+// so that no entities appear only for some systems mid-frame
 ```
 
 ##### 5. kill entities
@@ -78,7 +79,8 @@ e.AddComponent<VelocityComponent>(10, 10);
 // inside system's update method
 entity.Kill();
 if (!entity.IsAlive()) { ... };
-// entity is alive until next call to world.Update(), so that every system gets the chance handle the entity
+// entity is alive until next call to world.Update(),
+// so that every system gets the chance handle the entity
 ```
 
 ##### 6. update world and systems in game loop
@@ -114,7 +116,38 @@ auto enemies = world.GetEntityGroup("enemies");
 events
 ------
 
-todo: write this
+Events are a way for inter-system communication (e.g. CollisionSystem emits collision event which DamageSystem is interested in).
+
+##### 1. define events
+
+```c++
+// note: must have default constructor
+
+struct CollisionEvent
+{
+    PositionComponent(Entity a = Entity(), Entity b = Entity()) : a(a), b(b) {}
+    Entity a, b;
+};
+```
+
+##### 2. emit events
+
+```c++
+// inside system's update method
+Entity player, enemy;
+GetWorld().GetEventManager().EmitEvent<CollisionEvent>(player, enemy);
+```
+
+##### 3. receive events
+
+```c++
+// inside other system's update method
+auto collisionEvents = GetWorld().GetEventManager().GetEvents<CollisionEvent>();
+for (auto event : collisionEvents) { // handle collision };
+
+// events can be received by any system
+// events exist until the next call to world.Update()
+```
 
 what else?
 ----------
@@ -125,6 +158,6 @@ todo
 ----
 
 1. removal of tags/groups from entities
-2. helper methods to retrieve entities by tags and groups (regardless of interest?)
+2. helper methods to retrieve entities by tags and groups within systems (regardless of interest?)
 3. make retrieving entities by tags/groups less harsh, i.e. no assertions but rather return invalid entities
 4. methods for checking if tag and group name exists at all in world/system

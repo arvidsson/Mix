@@ -2,6 +2,7 @@
 
 #include "Pool.hpp"
 #include <unordered_map>
+#include <vector>
 #include <memory>
 #include <typeindex>
 #include <cstdint>
@@ -37,7 +38,7 @@ public:
     template <typename T> void EmitEvent(T event);
     template <typename T, typename ... Args> void EmitEvent(Args && ... args);
 
-    template <typename T> std::shared_ptr<Pool<T>> GetEvents();
+    template <typename T> std::vector<T> GetEvents();
 
     void DestroyEvents();
 
@@ -76,9 +77,9 @@ std::shared_ptr<Pool<T>> EventManager::AccommodateEvent()
 }
 
 template <typename T>
-std::shared_ptr<Pool<T>> EventManager::GetEvents()
+std::vector<T> EventManager::GetEvents()
 {
-    return std::static_pointer_cast<Pool<T>>(eventPools[std::type_index(typeid(T))]);
+    return std::static_pointer_cast<Pool<T>>(eventPools[std::type_index(typeid(T))]).GetData();
 }
 
 }

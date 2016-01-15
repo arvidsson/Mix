@@ -34,9 +34,10 @@ public:
 
     const ComponentMask& GetComponentMask() const { return componentMask; }
 
-private:
+protected:
     World& GetWorld() const;
 
+private:
     // which components an entity must have in order for the system to process the entity
     ComponentMask componentMask;
 

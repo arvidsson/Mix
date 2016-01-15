@@ -74,6 +74,11 @@ public:
         return data[index];
     }
 
+    std::vector<T> GetData()
+    {
+        return data;
+    }
+
 private:
     std::vector<T> data;
 };
