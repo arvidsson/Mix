@@ -9,7 +9,7 @@ the basics
 ##### 0. include entity
 
 ```c++
-#include "entity/world.hpp"
+#include "entity/World.hpp"
 ```
 
 ##### 1. define components
@@ -69,18 +69,62 @@ world.GetSystemManager().AddSystem<MoveSystem>();
 auto e = world.CreateEntity();
 e.AddComponent<PositionComponent>(100, 100);
 e.AddComponent<VelocityComponent>(10, 10);
+// entity is created on the next call to world.Update(), so that no entities appear only for some systems mid-frame
 ```
 
-##### 5. update world and systems in game loop
+##### 5. kill entities
+
+```c++
+// inside system's update method
+entity.Kill();
+if (!entity.IsAlive()) { ... };
+// entity is alive until next call to world.Update(), so that every system gets the chance handle the entity
+```
+
+##### 6. update world and systems in game loop
 
 ```c++
 while (!done) {
-    world.Update();
+    world.Update(); // actually creates and kills entities since the last call to this method
     world.GetSystemManager().GetSystem<MoveSystem>().Update();
 }
 ```
 
+tags & groups
+-------------
+
+##### 1. tags
+
+```c++
+auto player = world.CreateEntity();
+player.Tag("player");
+if (player.HasTag("player")) { ... };
+auto entity = world.GetEntity("player");
+```
+
+##### 2. groups
+
+```c++
+auto enemy = world.CreateEntity();
+enemy.Group("enemies");
+if (enemy.HasGroup("enemies")) { ... };
+auto enemies = world.GetEntityGroup("enemies");
+```
+
 events
-----------
+------
 
 todo: write this
+
+what else?
+----------
+
+Code is fairly well documented. Read and experiment! :)
+
+todo
+----
+
+1. removal of tags/groups from entities
+2. helper methods to retrieve entities by tags and groups (regardless of interest?)
+3. make retrieving entities by tags/groups less harsh, i.e. no assertions but rather return invalid entities
+4. methods for checking if tag and group name exists at all in world/system

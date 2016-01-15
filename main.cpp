@@ -1,4 +1,4 @@
-#include "entity/world.hpp"
+#include "entity/World.hpp"
 #include <iostream>
 using namespace entity;
 
@@ -38,8 +38,8 @@ int main()
 {
     World world;
     auto e = world.CreateEntity();
-    e.AddComponent<PositionComponent>(50, 50);
-    e.AddComponent<VelocityComponent>(10, 0);
+    e.AddComponent<PositionComponent>(100, 100);
+    e.AddComponent<VelocityComponent>(10, 10);
     world.GetSystemManager().AddSystem<MoveSystem>();
 
     for (int i = 0; i < 10; i++) {
