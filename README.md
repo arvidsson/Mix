@@ -3,7 +3,14 @@ entity
 
 A minimal [entity-component system](https://en.wikipedia.org/wiki/Entity_component_system).
 
-the basics
+Features
+--------
+
+* ECS
+* tags and groups
+* rudimentary event handling
+
+The Basics
 ----------
 
 ##### 0. include entity
@@ -92,7 +99,7 @@ while (!done) {
 }
 ```
 
-tags & groups
+Tags & Groups
 -------------
 
 ##### 1. tags
@@ -113,7 +120,7 @@ if (enemy.HasGroup("enemies")) { ... };
 auto enemies = world.GetEntityGroup("enemies");
 ```
 
-events
+Events
 ------
 
 Events are a way for inter-system communication (e.g. CollisionSystem emits collision event which DamageSystem is interested in).
@@ -149,15 +156,11 @@ for (auto event : collisionEvents) { // handle collision };
 // events exist until the next call to world.Update()
 ```
 
-what else?
+What else?
 ----------
 
 Code is fairly well documented. Read and experiment! :)
 
-todo
-----
-
-1. removal of tags/groups from entities
-2. helper methods to retrieve entities by tags and groups within systems (regardless of interest?)
-3. make retrieving entities by tags/groups less harsh, i.e. no assertions but rather return invalid entities
-4. methods for checking if tag and group name exists at all in world/system
+License
+-------
+MIT (c) arvidsson
