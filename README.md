@@ -10,6 +10,11 @@ Features
 * tags and groups
 * rudimentary event handling
 
+Install
+-------
+
+Include ```entity``` folder in your project.
+
 The Basics
 ----------
 
