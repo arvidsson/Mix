@@ -1,48 +1,48 @@
-#include "System.hpp"
-#include "World.hpp"
+#include "System.h"
+#include "World.h"
 #include <algorithm>
 
 namespace entity
 {
 
-void System::AddEntity(Entity e)
+void System::addEntity(Entity e)
 {
     entities.push_back(e);
 }
 
-void System::RemoveEntity(Entity e)
+void System::removeEntity(Entity e)
 {
     entities.erase(std::remove_if(entities.begin(), entities.end(),
         [&e](Entity other) { return e == other; }
     ), entities.end());
 }
 
-World& System::GetWorld() const
+World& System::getWorld() const
 {
     assert(world != nullptr);
     return *world;
 }
 
-void SystemManager::AddToSystems(Entity e)
+void SystemManager::addToSystems(Entity e)
 {
-    const auto &entityComponentMask = world.GetEntityManager().GetComponentMask(e);
+    const auto &entityComponentMask = world.getEntityManager().getComponentMask(e);
 
     for (auto &it : systems) {
         auto &system = it.second;
-        const auto &systemComponentMask = system->GetComponentMask();
+        const auto &systemComponentMask = system->getComponentMask();
         auto interest = (entityComponentMask & systemComponentMask) == systemComponentMask;
 
         if (interest) {
-            system->AddEntity(e);
+            system->addEntity(e);
         }
     }
 }
 
-void SystemManager::RemoveFromSystems(Entity e)
+void SystemManager::removeFromSystems(Entity e)
 {
     for (auto &it : systems) {
         auto &system = it.second;
-        system->RemoveEntity(e);
+        system->removeEntity(e);
     }
 }
 
