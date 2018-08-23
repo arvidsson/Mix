@@ -221,49 +221,49 @@ void EntityManager::addComponent(Entity e, T component)
 }
 
 template <typename T, typename ... Args>
-void EntityManager::AddComponent(Entity e, Args && ... args)
+void EntityManager::addComponent(Entity e, Args && ... args)
 {
     T component(std::forward<Args>(args) ...);
-    AddComponent<T>(e, component);
+    addComponent<T>(e, component);
 }
 
 template <typename T>
-void EntityManager::RemoveComponent(Entity e)
+void EntityManager::removeComponent(Entity e)
 {
-    const auto componentId = Component<T>::GetId();
-    const auto entityId = e.GetIndex();
+    const auto componentId = Component<T>::getId();
+    const auto entityId = e.getIndex();
     assert(entityId < componentMasks.size());
     componentMasks[entityId].set(componentId, false);
 }
 
 template <typename T>
-bool EntityManager::HasComponent(Entity e) const
+bool EntityManager::hasComponent(Entity e) const
 {
-    const auto componentId = Component<T>::GetId();
-    const auto entityId = e.GetIndex();
+    const auto componentId = Component<T>::getId();
+    const auto entityId = e.getIndex();
     assert(entityId < componentMasks.size());
     return componentMasks[entityId].test(componentId);
 }
 
 template <typename T>
-T& EntityManager::GetComponent(Entity e) const
+T& EntityManager::getComponent(Entity e) const
 {
-    const auto componentId = Component<T>::GetId();
-    const auto entityId = e.GetIndex();
+    const auto componentId = Component<T>::getId();
+    const auto entityId = e.getIndex();
 
-    assert(HasComponent<T>(e));
+    assert(hasComponent<T>(e));
     assert(componentId < componentPools.size());
     auto componentPool = std::static_pointer_cast<Pool<T>>(componentPools[componentId]);
 
     assert(componentPool);
-    assert(entityId < componentPool->GetSize());
-    return componentPool->Get(entityId);
+    assert(entityId < componentPool->getSize());
+    return componentPool->get(entityId);
 }
 
 template <typename T>
-std::shared_ptr<Pool<T>> EntityManager::AccommodateComponent()
+std::shared_ptr<Pool<T>> EntityManager::accommodateComponent()
 {
-    const auto componentId = Component<T>::GetId();
+    const auto componentId = Component<T>::getId();
 
     if (componentId >= componentPools.size()) {
         componentPools.resize(componentId + 1, nullptr);
