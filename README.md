@@ -6,7 +6,7 @@ A minimal [entity-component system](https://en.wikipedia.org/wiki/Entity_compone
 Features
 --------
 
-* ECS
+* entity–component–system implementation
 * tags and groups
 * rudimentary event handling
 
@@ -21,7 +21,7 @@ The Basics
 ##### 0. include entity
 
 ```c++
-#include "entity/World.hpp"
+#include "entity/World.h"
 ```
 
 ##### 1. define components
@@ -51,16 +51,16 @@ public:
     MoveSystem()
     {
         // which components an entity must have for the system to be interested
-        RequireComponent<PositionComponent>();
-        RequireComponent<VelocityComponent>();
+        requireComponent<PositionComponent>();
+        requireComponent<VelocityComponent>();
     }
 
-    void Update()
+    void update()
     {
         // do stuff with all the entities of interest
-        for (auto e : GetEntities()) {
-            auto &position = e.GetComponent<PositionComponent>();
-            const auto &velocity = e.GetComponent<VelocityComponent>();
+        for (auto e : getEntities()) {
+            auto &position = e.getComponent<PositionComponent>();
+            const auto &velocity = e.getComponent<VelocityComponent>();
             position.x += velocity.x;
             position.y += velocity.y;
         }
@@ -72,16 +72,16 @@ public:
 
 ```c++
 entity::World world;
-world.GetSystemManager().AddSystem<MoveSystem>();
+world.getSystemManager().addSystem<MoveSystem>();
 ```
 
 ##### 4. create entities
 
 ```c++
-auto e = world.CreateEntity();
-e.AddComponent<PositionComponent>(100, 100);
-e.AddComponent<VelocityComponent>(10, 10);
-// entity is created on the next call to world.Update(),
+auto e = world.createEntity();
+e.addComponent<PositionComponent>(100, 100);
+e.addComponent<VelocityComponent>(10, 10);
+// entity is created on the next call to world.update(),
 // so that no entities appear only for some systems mid-frame
 ```
 
@@ -89,9 +89,9 @@ e.AddComponent<VelocityComponent>(10, 10);
 
 ```c++
 // inside system's update method
-entity.Kill();
-if (!entity.IsAlive()) { ... };
-// entity is alive until next call to world.Update(),
+entity.kill();
+if (!entity.isAlive()) { ... };
+// entity is alive until next call to world.update(),
 // so that every system gets the chance handle the entity
 ```
 
@@ -99,8 +99,8 @@ if (!entity.IsAlive()) { ... };
 
 ```c++
 while (!done) {
-    world.Update(); // actually creates and kills entities since the last call to this method
-    world.GetSystemManager().GetSystem<MoveSystem>().Update();
+    world.update(); // actually creates and kills entities since the last call to this method
+    world.getSystemManager().getSystem<MoveSystem>().update();
 }
 ```
 
@@ -110,19 +110,19 @@ Tags & Groups
 ##### 1. tags
 
 ```c++
-auto player = world.CreateEntity();
-player.Tag("player");
-if (player.HasTag("player")) { ... };
-auto entity = world.GetEntity("player");
+auto player = world.createEntity();
+player.tag("player");
+if (player.hasTag("player")) { ... };
+auto entity = world.getEntity("player");
 ```
 
 ##### 2. groups
 
 ```c++
-auto enemy = world.CreateEntity();
-enemy.Group("enemies");
-if (enemy.HasGroup("enemies")) { ... };
-auto enemies = world.GetEntityGroup("enemies");
+auto enemy = world.createEntity();
+enemy.group("enemies");
+if (enemy.hasGroup("enemies")) { ... };
+auto enemies = world.getEntityGroup("enemies");
 ```
 
 Events
@@ -147,18 +147,18 @@ struct CollisionEvent
 ```c++
 // inside system's update method
 Entity player, enemy;
-GetWorld().GetEventManager().EmitEvent<CollisionEvent>(player, enemy);
+getWorld().getEventManager().emitEvent<CollisionEvent>(player, enemy);
 ```
 
 ##### 3. receive events
 
 ```c++
 // inside other system's update method
-auto collisionEvents = GetWorld().GetEventManager().GetEvents<CollisionEvent>();
+auto collisionEvents = getWorld().getEventManager().getEvents<CollisionEvent>();
 for (auto event : collisionEvents) { // handle collision };
 
 // events can be received by any system
-// events exist until the next call to world.Update()
+// events exist until the next call to world.update()
 ```
 
 What else?
