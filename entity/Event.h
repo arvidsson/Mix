@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Pool.hpp"
+#include "Pool.h"
 #include <unordered_map>
 #include <vector>
 #include <memory>
@@ -16,16 +16,16 @@ struct BaseEvent
 {
     using Id = uint8_t;
 protected:
-    static Id idCounter;
+    static Id nextId;
 };
 
 template <typename T>
 struct Event : BaseEvent
 {
     // Returns the unique id of Event<T>
-    static Id GetId()
+    static Id getId()
     {
-        static auto id = idCounter++;
+        static auto id = nextId++;
         return id;
     }
 };
@@ -35,16 +35,20 @@ class EventManager
 public:
     EventManager(World &world) : world(world) {}
 
-    template <typename T> void EmitEvent(T event);
-    template <typename T, typename ... Args> void EmitEvent(Args && ... args);
+    template <typename T>
+    void emitEvent(T event);
+    
+    template <typename T, typename ... Args>
+    void emitEvent(Args && ... args);
 
-    template <typename T> std::vector<T> GetEvents();
+    template <typename T>
+    std::vector<T> getEvents();
 
-    void DestroyEvents();
+    void destroyEvents();
 
 private:
     template <typename T>
-    std::shared_ptr<Pool<T>> AccommodateEvent();
+    std::shared_ptr<Pool<T>> accommodateEvent();
 
     std::unordered_map<std::type_index, std::shared_ptr<BasePool>> eventPools;
 
@@ -52,21 +56,21 @@ private:
 };
 
 template <typename T>
-void EventManager::EmitEvent(T event)
+void EventManager::emitEvent(T event)
 {
-    std::shared_ptr<Pool<T>> eventPool = AccommodateEvent<T>();
-    eventPool->Add(event);
+    std::shared_ptr<Pool<T>> eventPool = accommodateEvent<T>();
+    eventPool->add(event);
 }
 
 template <typename T, typename ... Args>
-void EventManager::EmitEvent(Args && ... args)
+void EventManager::emitEvent(Args && ... args)
 {
     T event(std::forward<Args>(args) ...);
-    EmitEvent<T>(event);
+    emitEvent<T>(event);
 }
 
 template <typename T>
-std::shared_ptr<Pool<T>> EventManager::AccommodateEvent()
+std::shared_ptr<Pool<T>> EventManager::accommodateEvent()
 {
     if (eventPools.find(std::type_index(typeid(T))) == eventPools.end()) {
         std::shared_ptr<Pool<T>> pool(new Pool<T>());
@@ -77,9 +81,9 @@ std::shared_ptr<Pool<T>> EventManager::AccommodateEvent()
 }
 
 template <typename T>
-std::vector<T> EventManager::GetEvents()
+std::vector<T> EventManager::getEvents()
 {
-    return std::static_pointer_cast<Pool<T>>(eventPools[std::type_index(typeid(T))]).GetData();
+    return std::static_pointer_cast<Pool<T>>(eventPools[std::type_index(typeid(T))]).getData();
 }
 
 }
