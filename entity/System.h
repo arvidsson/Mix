@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Event.hpp"
-#include "Entity.hpp"
+#include "Event.h"
+#include "Entity.h"
 #include <vector>
 #include <unordered_map>
 #include <typeindex>
@@ -21,21 +21,21 @@ public:
 
     // what component types the system requires of entities (we can use this method in the constructor for example)
     template <typename T>
-    void RequireComponent();
+    void requireComponent();
 
     // returns a list of entities that the system should process each frame
-    std::vector<Entity> GetEntities() { return entities; }
+    std::vector<Entity> getEntities() { return entities; }
 
     // adds an entity of interest
-    void AddEntity(Entity e);
+    void addEntity(Entity e);
 
     // if the entity is not alive anymore (during processing), the entity should be removed
-    void RemoveEntity(Entity e);
+    void removeEntity(Entity e);
 
-    const ComponentMask& GetComponentMask() const { return componentMask; }
+    const ComponentMask& getComponentMask() const { return componentMask; }
 
 protected:
-    World& GetWorld() const;
+    World& getWorld() const;
 
 private:
     // which components an entity must have in order for the system to process the entity
@@ -53,17 +53,26 @@ class SystemManager
 public:
     SystemManager(World &world) : world(world) {}
 
-    template <typename T> void AddSystem();
-    template <typename T, typename ... Args> void AddSystem(Args && ... args);
-    template <typename T> void RemoveSystem();
-    template <typename T> T& GetSystem();
-    template <typename T> bool HasSystem() const;
+    template <typename T>
+    void addSystem();
+    
+    template <typename T, typename ... Args>
+    void addSystem(Args && ... args);
+    
+    template <typename T>
+    void removeSystem();
+    
+    template <typename T>
+    T& getSystem();
+    
+    template <typename T>
+    bool hasSystem() const;
 
     // adds an entity to each system that is interested of the entity
-    void AddToSystems(Entity e);
+    void addToSystems(Entity e);
 
     // removes an entity from interested systems' entity lists
-    void RemoveFromSystems(Entity e);
+    void removeFromSystems(Entity e);
 
 private:
     std::unordered_map<std::type_index, std::shared_ptr<System>> systems;
@@ -72,16 +81,16 @@ private:
 };
 
 template <typename T>
-void System::RequireComponent()
+void System::requireComponent()
 {
-    const auto componentId = Component<T>::GetId();
+    const auto componentId = Component<T>::getId();
     componentMask.set(componentId);
 }
 
 template <typename T>
-void SystemManager::AddSystem()
+void SystemManager::addSystem()
 {
-    if (HasSystem<T>()) {
+    if (hasSystem<T>()) {
         return;
     }
 
@@ -91,9 +100,9 @@ void SystemManager::AddSystem()
 }
 
 template <typename T, typename ... Args>
-void SystemManager::AddSystem(Args && ... args)
+void SystemManager::addSystem(Args && ... args)
 {
-    if (HasSystem<T>()) {
+    if (hasSystem<T>()) {
         return;
     }
 
@@ -103,9 +112,9 @@ void SystemManager::AddSystem(Args && ... args)
 }
 
 template <typename T>
-void SystemManager::RemoveSystem()
+void SystemManager::removeSystem()
 {
-    if (!HasSystem<T>()) {
+    if (!hasSystem<T>()) {
         return;
     }
 
@@ -114,9 +123,9 @@ void SystemManager::RemoveSystem()
 }
 
 template <typename T>
-T& SystemManager::GetSystem()
+T& SystemManager::getSystem()
 {
-    if (!HasSystem<T>()) {
+    if (!hasSystem<T>()) {
         throw std::runtime_error(std::string("Failed to get system: ") + typeid(T).name());
     }
 
@@ -125,7 +134,7 @@ T& SystemManager::GetSystem()
 }
 
 template <typename T>
-bool SystemManager::HasSystem() const
+bool SystemManager::hasSystem() const
 {
     return systems.find(std::type_index(typeid(T))) != systems.end();
 }
