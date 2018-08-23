@@ -1,6 +1,6 @@
-#include "entity/World.hpp"
+#include "Mix/World.hpp"
 #include <iostream>
-using namespace entity;
+using namespace Mix;
 
 struct PositionComponent
 {
@@ -19,15 +19,15 @@ class MoveSystem : public System
 public:
     MoveSystem()
     {
-        RequireComponent<PositionComponent>();
-        RequireComponent<VelocityComponent>();
+        requireComponent<PositionComponent>();
+        requireComponent<VelocityComponent>();
     }
 
-    void Update()
+    void update()
     {
-        for (auto e : GetEntities()) {
-            auto &position = e.GetComponent<PositionComponent>();
-            const auto velocity = e.GetComponent<VelocityComponent>();
+        for (auto e : getEntities()) {
+            auto &position = e.getComponent<PositionComponent>();
+            const auto velocity = e.getComponent<VelocityComponent>();
             position.x += velocity.x;
             position.y += velocity.y;
         }
@@ -37,15 +37,15 @@ public:
 int main()
 {
     World world;
-    auto e = world.CreateEntity();
-    e.AddComponent<PositionComponent>(100, 100);
-    e.AddComponent<VelocityComponent>(10, 10);
-    world.GetSystemManager().AddSystem<MoveSystem>();
+    auto e = world.createEntity();
+    e.addComponent<PositionComponent>(100, 100);
+    e.addComponent<VelocityComponent>(10, 10);
+    world.getSystemManager().addSystem<MoveSystem>();
 
     for (int i = 0; i < 10; i++) {
-        world.Update();
-        world.GetSystemManager().GetSystem<MoveSystem>().Update();
-        auto &position = e.GetComponent<PositionComponent>();
+        world.update();
+        world.getSystemManager().getSystem<MoveSystem>().update();
+        auto &position = e.getComponent<PositionComponent>();
         std::cout << "x: " << position.x << ", y: " << position.y << std::endl;
     }
 

@@ -1,7 +1,7 @@
 #include "World.h"
 #include <cassert>
 
-namespace entity
+namespace Mix
 {
 
 World::World()

@@ -7,7 +7,7 @@
 #include <typeindex>
 #include <cstdint>
 
-namespace entity
+namespace Mix
 {
 
 class World;

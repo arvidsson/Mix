@@ -2,7 +2,7 @@
 #include "World.h"
 #include <algorithm>
 
-namespace entity
+namespace Mix
 {
 
 void System::addEntity(Entity e)

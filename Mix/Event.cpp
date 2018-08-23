@@ -1,7 +1,7 @@
 #include "Event.h"
 #include "World.h"
 
-namespace entity
+namespace Mix
 {
 
 BaseEvent::Id BaseEvent::nextId = 0;

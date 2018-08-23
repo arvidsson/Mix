@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <cassert>
 
-namespace entity
+namespace Mix
 {
 
 /*

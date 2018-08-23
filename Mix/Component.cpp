@@ -1,6 +1,6 @@
 #include "Component.h"
 
-namespace entity
+namespace Mix
 {
 
 BaseComponent::Id BaseComponent::nextId = 0;

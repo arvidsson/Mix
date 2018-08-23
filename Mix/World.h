@@ -1,3 +1,7 @@
+// Mix - A minimal entity-component-system.
+// Copyright 2014-2018 Par Arvidsson. All rights reserved.
+// Licensed under the MIT license (https://github.com/arvidsson/Mix/blob/master/LICENSE).
+
 #pragma once
 
 #include "Entity.h"
@@ -7,7 +11,7 @@
 #include <string>
 #include <memory>
 
-namespace entity
+namespace Mix
 {
 
 // The World manages the creation and destruction of entities so that entities.

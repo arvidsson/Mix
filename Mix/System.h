@@ -7,7 +7,7 @@
 #include <typeindex>
 #include <memory>
 
-namespace entity
+namespace Mix
 {
 
 class SystemManager;

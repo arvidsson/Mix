@@ -1,7 +1,7 @@
-entity
+Mix
 ======
 
-A minimal [entity-component system](https://en.wikipedia.org/wiki/Entity_component_system).
+A minimal [entity-component-system](https://en.wikipedia.org/wiki/Entity_component_system).
 
 Features
 --------
@@ -13,15 +13,15 @@ Features
 Install
 -------
 
-Include ```entity``` folder in your project.
+Include ```Mix``` folder in your project.
 
 The Basics
 ----------
 
-##### 0. include entity
+##### 0. include Mix
 
 ```c++
-#include "entity/World.h"
+#include "Mix/World.h"
 ```
 
 ##### 1. define components
@@ -45,7 +45,7 @@ struct VelocityComponent
 ##### 2. define systems
 
 ```c++
-class MoveSystem : public entity::System
+class MoveSystem : public Mix::System
 {
 public:
     MoveSystem()
@@ -71,7 +71,7 @@ public:
 ##### 3. create the world and add systems
 
 ```c++
-entity::World world;
+Mix::World world;
 world.getSystemManager().addSystem<MoveSystem>();
 ```
 

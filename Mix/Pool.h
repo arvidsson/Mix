@@ -3,7 +3,7 @@
 #include <vector>
 #include <cassert>
 
-namespace entity
+namespace Mix
 {
 
 // Required to have a vector of pools containing different object types.

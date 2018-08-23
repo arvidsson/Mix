@@ -11,7 +11,7 @@
 #include <string>
 #include <cstdint>
 
-namespace entity
+namespace Mix
 {
 
 class World;
