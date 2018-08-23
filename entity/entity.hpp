@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Config.hpp"
-#include "Component.hpp"
-#include "Pool.hpp"
+#include "Config.h"
+#include "Component.h"
+#include "Pool.h"
 #include <vector>
 #include <deque>
 #include <unordered_map>
@@ -35,58 +35,58 @@ public:
     /*
         Comparison operators.
     */
-    bool operator==(const Entity &e) const { return GetIndex() == e.GetIndex(); }
-    bool operator!=(const Entity &e) const { return GetIndex() != e.GetIndex(); }
-    bool operator<(const Entity &e) const { return GetIndex() < e.GetIndex(); }
+    bool operator==(const Entity &e) const { return getIndex() == e.getIndex(); }
+    bool operator!=(const Entity &e) const { return getIndex() != e.getIndex(); }
+    bool operator<(const Entity &e) const { return getIndex() < e.getIndex(); }
 
     /*
         Returns the index part of the id.
     */
-    Id GetIndex() const { return id & IndexMask; }
+    Id getIndex() const { return id & IndexMask; }
 
     /*
         Returns the version part of the id.
     */
-    Version GetVersion() const { return (id >> IndexBits) & VersionMask; }
+    Version getVersion() const { return (id >> IndexBits) & VersionMask; }
 
     /*
         Kills the entity (destroyed when the world updates).
     */
-    void Kill();
+    void kill();
 
     /*
         Checks whether the entity is still alive.
     */
-    bool IsAlive() const;
+    bool isAlive() const;
 
     /*
         Component management.
     */
-    template <typename T> void AddComponent(T component);
-    template <typename T, typename ... Args> void AddComponent(Args && ... args);
-    template <typename T> void RemoveComponent();
-    template <typename T> bool HasComponent() const;
-    template <typename T> T& GetComponent() const;
+    template <typename T> void addComponent(T component);
+    template <typename T, typename ... Args> void addComponent(Args && ... args);
+    template <typename T> void removeComponent();
+    template <typename T> bool hasComponent() const;
+    template <typename T> T& getComponent() const;
 
     /*
         Tags the entity.
     */
-    void Tag(std::string tagName);
-    bool HasTag(std::string tagName) const;
+    void tag(std::string tag);
+    bool hasTag(std::string tag) const;
 
     /*
         Adds the entity to a certain group.
     */
-    void Group(std::string groupName);
-    bool HasGroup(std::string groupName) const;
+    void group(std::string group);
+    bool hasGroup(std::string group) const;
 
     /*
         Returns a string of the entity (id + version).
     */
-    std::string ToString() const;
+    std::string toString() const;
 
 private:
-    EntityManager& GetEntityManager() const;
+    EntityManager& getEntityManager() const;
 
     static const uint32_t IndexBits = INDEX_BITS;
     static const uint32_t IndexMask = (1 << IndexBits) - 1;
@@ -108,44 +108,44 @@ public:
     /*
         Entity management.
     */
-    Entity CreateEntity();
-    void DestroyEntity(Entity e);
-    void KillEntity(Entity e);
-    bool IsEntityAlive(Entity e) const;
-    Entity GetEntity(Entity::Id index);
+    Entity createEntity();
+    void destroyEntity(Entity e);
+    void killEntity(Entity e);
+    bool isEntityAlive(Entity e) const;
+    Entity getEntity(Entity::Id index);
 
     /*
         Component management.
     */
-    template <typename T> void AddComponent(Entity e, T component);
-    template <typename T, typename ... Args> void AddComponent(Entity e, Args && ... args);
-    template <typename T> void RemoveComponent(Entity e);
-    template <typename T> bool HasComponent(Entity e) const;
-    template <typename T> T& GetComponent(Entity e) const;
-    const ComponentMask& GetComponentMask(Entity e) const;
+    template <typename T> void addComponent(Entity e, T component);
+    template <typename T, typename ... Args> void addComponent(Entity e, Args && ... args);
+    template <typename T> void removeComponent(Entity e);
+    template <typename T> bool hasComponent(Entity e) const;
+    template <typename T> T& getComponent(Entity e) const;
+    const ComponentMask& getComponentMask(Entity e) const;
 
     /*
         Tag management.
     */
-    void TagEntity(Entity e, std::string tagName);
-    bool HasTag(std::string tagName) const;
-    bool HasTaggedEntity(std::string tagName, Entity e) const;
-    Entity GetEntityByTag(std::string tagName);
-    int GetTagCount() const;
+    void tagEntity(Entity e, std::string tag);
+    bool hasTag(std::string tag) const;
+    bool hasTaggedEntity(std::string tag, Entity e) const;
+    Entity getEntityByTag(std::string tag);
+    int getTagCount() const;
 
     /*
         Group management.
     */
-    void GroupEntity(Entity e, std::string groupName);
-    bool HasGroup(std::string groupName) const;
-    bool HasEntityInGroup(std::string groupName, Entity e) const;
-    std::vector<Entity> GetEntityGroup(std::string groupName);
-    int GetGroupCount() const;
-    int GetEntityGroupCount(std::string groupName);
+    void groupEntity(Entity e, std::string group);
+    bool hasGroup(std::string group) const;
+    bool hasEntityInGroup(std::string group, Entity e) const;
+    std::vector<Entity> getEntityGroup(std::string group);
+    int getGroupCount() const;
+    int getEntityGroupCount(std::string group);
 
 private:
     template <typename T>
-    std::shared_ptr<Pool<T>> AccommodateComponent();
+    std::shared_ptr<Pool<T>> accommodateComponent();
 
     // minimum amount of free indices before we reuse one
     const std::uint32_t MinimumFreeIds = MINIMUM_FREE_IDS;
@@ -176,47 +176,47 @@ private:
 };
 
 template <typename T>
-void Entity::AddComponent(T component)
+void Entity::addComponent(T component)
 {
-    GetEntityManager().AddComponent<T>(*this, component);
+    getEntityManager().addComponent<T>(*this, component);
 }
 
 template <typename T, typename ... Args>
-void Entity::AddComponent(Args && ... args)
+void Entity::addComponent(Args && ... args)
 {
-    GetEntityManager().AddComponent<T>(*this, std::forward<Args>(args)...);
+    getEntityManager().addComponent<T>(*this, std::forward<Args>(args)...);
 }
 
 template <typename T>
-void Entity::RemoveComponent()
+void Entity::removeComponent()
 {
-    GetEntityManager().RemoveComponent<T>(*this);
+    getEntityManager().removeComponent<T>(*this);
 }
 
 template <typename T>
-bool Entity::HasComponent() const
+bool Entity::hasComponent() const
 {
-    return GetEntityManager().HasComponent<T>(*this);
+    return getEntityManager().hasComponent<T>(*this);
 }
 
 template <typename T>
-T& Entity::GetComponent() const
+T& Entity::getComponent() const
 {
-    return GetEntityManager().GetComponent<T>(*this);
+    return getEntityManager().getComponent<T>(*this);
 }
 
 template <typename T>
-void EntityManager::AddComponent(Entity e, T component)
+void EntityManager::addComponent(Entity e, T component)
 {
-    const auto componentId = Component<T>::GetId();
-    const auto entityId = e.GetIndex();
-    std::shared_ptr<Pool<T>> componentPool = AccommodateComponent<T>();
+    const auto componentId = Component<T>::getId();
+    const auto entityId = e.getIndex();
+    std::shared_ptr<Pool<T>> componentPool = accommodateComponent<T>();
 
-    if (entityId >= componentPool->GetSize()) {
-        componentPool->Resize(versions.size());
+    if (entityId >= componentPool->getSize()) {
+        componentPool->resize(versions.size());
     }
 
-    componentPool->Set(entityId, component);
+    componentPool->set(entityId, component);
     componentMasks[entityId].set(componentId);
 }
 
