@@ -6,60 +6,60 @@
 namespace entity
 {
 
-// Base class so we can have a vector of pools containing different object types.
-class BasePool
+// Required to have a vector of pools containing different object types.
+class AbstractPool
 {
 public:
-    virtual ~BasePool() {}
-    virtual void Clear() = 0;
+    virtual ~AbstractPool() {}
+    virtual void clear() = 0;
 };
 
 // A pool is just a vector (contiguous data) of objects of type T.
 template <typename T>
-class Pool : public BasePool
+class Pool : public AbstractPool
 {
 public:
-    Pool(int size = 100)
+    Pool(int size = DEFAULT_POOL_SIZE)
     {
-        Resize(size);
+        resize(size);
     }
 
     virtual ~Pool() {}
 
-    bool IsEmpty() const
+    bool isEmpty() const
     {
         return data.empty();
     }
 
-    unsigned int GetSize() const
+    unsigned int getSize() const
     {
         return data.size();
     }
 
-    void Resize(int n)
+    void resize(int n)
     {
         data.resize(n);
     }
 
-    void Clear()
+    void clear()
     {
         data.clear();
     }
 
-    bool Set(unsigned int index, T object)
+    bool set(unsigned int index, T object)
     {
-        assert(index < GetSize());
+        assert(index < getSize());
         data[index] = object;
         return true;
     }
 
-    T& Get(unsigned int index)
+    T& get(unsigned int index)
     {
-        assert(index < GetSize());
+        assert(index < getSize());
         return static_cast<T&>(data[index]);
     }
 
-    void Add(T object)
+    void add(T object)
     {
         data.push_back(object);
     }
@@ -74,7 +74,7 @@ public:
         return data[index];
     }
 
-    std::vector<T> GetData()
+    std::vector<T> getData()
     {
         return data;
     }
