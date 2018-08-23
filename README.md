@@ -168,4 +168,4 @@ Code is fairly well documented. Read and experiment! :)
 
 License
 -------
-MIT (c) arvidsson
+MIT (c) Pär Arvidsson 2014-2018
